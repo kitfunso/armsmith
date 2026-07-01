@@ -22,10 +22,33 @@ app = typer.Typer(
 _STUB = "not implemented yet (scaffold stage; see docs/plans/)"
 
 
+def _version_callback(value: bool) -> None:
+    if value:
+        from armsmith import __version__
+
+        typer.echo(f"armsmith {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        callback=_version_callback,
+        is_eager=True,
+        help="Show the armsmith version and exit.",
+    ),
+) -> None:
+    """Reproducible Graviton LLM optimization: deterministic tuner + LLM Performix analyst."""
+
+
 @app.command()
 def provision(
     instance: str = typer.Option("r8g.4xlarge", help="Graviton instance type."),
-    destroy: bool = typer.Option(False, help="Tear the target down instead of creating it."),
+    destroy: bool = typer.Option(
+        False, help="Tear the target down instead of creating it."
+    ),
 ) -> None:
     """Stand up (or tear down) a Graviton target."""
     typer.echo(f"provision (instance={instance}, destroy={destroy}): {_STUB}")
@@ -38,7 +61,9 @@ def baseline(
     workload: str = typer.Option("examples/bench.yaml", help="Workload spec."),
 ) -> None:
     """Capture the honest naive baseline and pin the pre-registered expert config."""
-    typer.echo(f"baseline (target={target}, model={model}, workload={workload}): {_STUB}")
+    typer.echo(
+        f"baseline (target={target}, model={model}, workload={workload}): {_STUB}"
+    )
 
 
 @app.command()
@@ -60,7 +85,9 @@ def report(run_id: str = typer.Argument(..., help="Run id to render.")) -> None:
 
 
 @app.command()
-def repro(run_id: str = typer.Argument(..., help="Run id whose recipe to replay.")) -> None:
+def repro(
+    run_id: str = typer.Argument(..., help="Run id whose recipe to replay.")
+) -> None:
     """Replay a saved recipe deterministically (no LLM) on a fresh instance."""
     typer.echo(f"repro (run_id={run_id}): {_STUB}")
 
