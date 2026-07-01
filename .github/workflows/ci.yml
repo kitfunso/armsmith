@@ -1,0 +1,38 @@
+# Lint + install smoke on x86 AND real aarch64 (free arm64 runners for public repos).
+# The arm64 job is build/smoke validation only: benchmark numbers are NEVER taken
+# from shared CI runners (CLAUDE.md rule 1 - real numbers come from Graviton).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff black
+      - run: ruff check src scripts
+      - run: black --check src scripts
+
+  smoke:
+    name: smoke (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - run: armsmith --version
+      - run: armsmith --help
+      - run: python -c "import platform; print('arch:', platform.machine())"
