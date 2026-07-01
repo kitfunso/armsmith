@@ -32,4 +32,4 @@ _TODO: flesh out after Spike 0 confirms the architecture._
 ---
 
 ## Status
-Pre-build. See [PLAN.md](./PLAN.md). **Spike 0 (Performix MCP scriptability) is the GO/NO-GO gate.**
+Pre-build. See [PLAN.md](./PLAN.md). Spike 0a (Performix MCP headless scriptability) **desk-verified GO** 2026-07-01 — `armlimited/arm-mcp` v3.4.2 drives Performix's `apx_recipe_run` from any MCP client ([evidence](./docs/spike0-result.md)). Remaining gate: target-side structured output + counter discrimination on a real Graviton.

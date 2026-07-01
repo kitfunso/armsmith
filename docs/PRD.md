@@ -41,9 +41,9 @@ Optimizing LLM inference for Arm is expert work: you must know which build flags
 - **Submission outcome (target):** win a **Cloud AI category**; stretch: Overall. Complete repo (Apache-2.0 visible), README with all 3 required sections, `<3 min` video.
 
 ## Constraints
-- **Timeline:** 46 days (deadline 15 Aug 2026). Solo (Keith + Claude).
+- **Timeline:** deadline **14 Aug 2026, 4:00pm PDT** (Devpost-verified 2026-07-01; internal cutoff 13 Aug). Solo (Keith + Claude).
 - **Hardware:** control plane is x86 Windows and cannot produce valid Arm numbers; all Arm measurement happens on Graviton (and optionally iPhone 17 Pro).
 - **Budget:** Graviton EC2 spot hours only (~tens of dollars). No other paid dependencies.
-- **Dependency risk:** Arm Performix is ~2 months old; headless scriptability of its MCP server is unverified -> **Spike 0 GO/NO-GO gate**, with a Performix-CLI-parse fallback.
+- **Dependency risk:** Arm Performix is ~3 months old. MCP headless scriptability was desk-verified 2026-07-01 (public `armlimited/arm-mcp` Docker stdio server, client-agnostic; `apx` CLI also installs on Windows x64 hosts). **Spike 0 gate remains** for the target-side half: structured output + counters that discriminate between levers.
 - **License:** Apache-2.0, detectable and visible at repo top.
 - **Agent brain:** model-agnostic (bring-your-own key/endpoint), default Claude via the Anthropic API.
