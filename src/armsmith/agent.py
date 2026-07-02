@@ -41,6 +41,7 @@ from armsmith.models import (
     BenchmarkResult,
     Delta,
     Diagnosis,
+    ParamValidationError,
     PerformixSnapshot,
     ProfilerError,
     QualityScore,
@@ -104,7 +105,13 @@ def enumerate_candidates(
         if not capabilities_ok(action, target):
             continue
         for raw_params in _param_combos(action, target):
-            validated = validate_suggestion(action.id, raw_params)
+            try:
+                validated = validate_suggestion(action.id, raw_params)
+            except ParamValidationError:
+                # The gate is the single source of combo legality (e.g. a
+                # quantized V-cache without flash attention is an engine-illegal
+                # combo); whatever it rejects the tuner simply never tries.
+                continue
             validated = _resolve_target_params(validated, target)
             # The model registry is the source of truth for which GGUF variants
             # exist: a quant the ModelSpec does not pin cannot be staged or

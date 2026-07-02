@@ -175,6 +175,24 @@ def test_unknown_param_key_raises() -> None:
         validate_suggestion("ggml_native", {"state": "ON", "shell": "rm -rf /"})
 
 
+def test_quantized_v_cache_without_flash_attn_rejected() -> None:
+    """llama.cpp cannot create a context with a quantized V-cache unless flash
+    attention is on (observed live on r8g 2026-07-02: `-ctv q8_0 -fa 0` ->
+    "failed to create context with model"). The gate must reject the combo so
+    neither the tuner nor a brain suggestion ever runs it."""
+    with pytest.raises(ParamValidationError, match="flash_attn"):
+        validate_suggestion(
+            "kv_cache_type",
+            {"type_k": "f16", "type_v": "q8_0", "flash_attn": "off"},
+        )
+    # The legal spelling of the same intent passes.
+    ok = validate_suggestion(
+        "kv_cache_type",
+        {"type_k": "f16", "type_v": "q8_0", "flash_attn": "on"},
+    )
+    assert ok.params["type_v"] == "q8_0"
+
+
 def test_enum_value_off_schema_raises() -> None:
     with pytest.raises(ParamValidationError):
         validate_suggestion("kv_cache_type", {"type_k": "int4"})

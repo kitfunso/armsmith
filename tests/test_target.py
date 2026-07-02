@@ -780,7 +780,7 @@ def test_run_quality_includes_kv_cache_flags_and_kld_base(
             "--kl-divergence",
         ]
     )
-    stdout = "Final estimate: PPL = 8.1234\nMean KL divergence:  0.0421\n"
+    stdout = "Mean PPL(Q)                   :   8.123400 +/-   0.5\nMean    KLD:   0.042100 +/-   0.0001\n"
     fake = FakeSSHClient({expected_cmd: (0, stdout, "")})
     target = make_target(model_spec, fake)
 
@@ -789,6 +789,31 @@ def test_run_quality_includes_kv_cache_flags_and_kld_base(
     assert fake.calls == [expected_cmd]
     assert score.perplexity == pytest.approx(8.1234)
     assert score.kl_vs_baseline == pytest.approx(0.0421)
+
+
+def test_parse_quality_output_against_real_kld_capture() -> None:
+    """Parses the VERBATIM stdout of llama-perplexity --kl-divergence captured
+    on a real r8g (2026-07-02). The old regexes expected 'Final estimate: PPL'
+    and 'Mean KL divergence', matched nothing, and silently returned
+    QualityScore(None, None) through a full live baseline run."""
+    from armsmith.target import _parse_quality_output
+
+    fixture = Path(__file__).parent / "fixtures" / "llama_perplexity_kld.txt"
+    text = fixture.read_text(encoding="utf-8")
+
+    score = _parse_quality_output(text)
+
+    assert score.perplexity == pytest.approx(15.972201)
+    assert score.kl_vs_baseline == pytest.approx(0.002036)
+
+
+def test_parse_quality_output_plain_perplexity_fallback() -> None:
+    from armsmith.target import _parse_quality_output
+
+    score = _parse_quality_output("Final estimate: PPL = 8.1234 +/- 0.5\n")
+
+    assert score.perplexity == pytest.approx(8.1234)
+    assert score.kl_vs_baseline is None
 
 
 def test_capture_base_logits_writes_kld_in_write_mode(

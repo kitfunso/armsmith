@@ -366,6 +366,23 @@ def test_enumerate_filters_quants_to_available_variants():
     assert any(va.action_id == "ggml_native" for va, _ in cands)
 
 
+def test_enumerate_never_emits_engine_illegal_kv_combos():
+    """Every enumerated kv_cache_type candidate with a quantized V-cache must
+    carry flash_attn=True; the validation gate rejects the illegal combo and
+    the enumerator skips it (observed live: `-ctv q8_0 -fa 0` crashed the
+    optimize run with "failed to create context")."""
+    target, model, workload = _target(), _model(), _workload()
+    base = baseline_config(workload, model)
+
+    cands = enumerate_candidates(REGISTRY, target, base)
+
+    kv_cands = [cfg for va, cfg in cands if va.action_id == "kv_cache_type"]
+    assert kv_cands  # the lever still contributes legal candidates
+    for cfg in kv_cands:
+        if cfg.type_v != "f16":
+            assert cfg.flash_attn is True
+
+
 def test_enumerate_composes_onto_incumbent_so_levers_stack():
     target, model, workload = _target(), _model(), _workload()
     base = baseline_config(workload, model)

@@ -448,12 +448,21 @@ def _parse_peak_mem_mb(stderr: str) -> float | None:
 
 
 def _parse_quality_output(stdout: str) -> QualityScore:
+    """Extract (perplexity, mean KL) from llama-perplexity output.
+
+    Formats verified against a REAL r8g capture 2026-07-02 (fixture
+    ``tests/fixtures/llama_perplexity_kld.txt``): KL mode prints
+    ``Mean PPL(Q)                   :  15.972201 +/- ...`` and
+    ``Mean    KLD:   0.002036 +/- ...``. Plain perplexity mode (no KL base)
+    prints ``Final estimate: PPL = ...`` - kept as the fallback."""
     perplexity: float | None = None
     kl_vs_baseline: float | None = None
-    ppl_match = re.search(r"Final estimate: PPL\s*=\s*([\d.]+)", stdout)
+    ppl_match = re.search(r"Mean PPL\(Q\)\s*:\s*([\d.]+)", stdout)
+    if ppl_match is None:
+        ppl_match = re.search(r"Final estimate: PPL\s*=\s*([\d.]+)", stdout)
     if ppl_match is not None:
         perplexity = float(ppl_match.group(1))
-    kld_match = re.search(r"Mean\s+KL[ -]?[Dd]ivergence\s*:?\s*([\d.eE+-]+)", stdout)
+    kld_match = re.search(r"Mean\s+KLD:\s*(-?[\d.eE+]+)", stdout)
     if kld_match is not None:
         kl_vs_baseline = float(kld_match.group(1))
     return QualityScore(perplexity=perplexity, kl_vs_baseline=kl_vs_baseline)

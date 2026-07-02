@@ -142,8 +142,26 @@ def validate_suggestion(
                 f"allowed {sorted(spec.params_schema)}"
             )
         coerced[key] = _coerce_param(action_id, key, spec.params_schema[key], value)
+    _check_cross_param_rules(action_id, coerced)
     logger.debug("validated %s params=%s", action_id, coerced)
     return ValidatedAction(action_id=action_id, params=coerced)
+
+
+def _check_cross_param_rules(action_id: str, params: Mapping[str, object]) -> None:
+    """Engine invariants that span params. llama.cpp refuses to create a
+    context with a QUANTIZED V-cache unless flash attention is enabled
+    (observed live on r8g 2026-07-02: `-ctv q8_0 -fa 0` -> "failed to create
+    context with model"). The gate is the single source of combo legality:
+    the tuner's enumerator and any brain suggestion both flow through here."""
+    if action_id == "kv_cache_type":
+        type_v = params.get("type_v")
+        flash_attn = params.get("flash_attn")
+        if type_v is not None and type_v != "f16" and flash_attn != "on":
+            raise ParamValidationError(
+                "kv_cache_type: a quantized V-cache (type_v="
+                f"{type_v!r}) requires flash_attn='on' (llama.cpp cannot "
+                "create the context otherwise)"
+            )
 
 
 def _coerce_param(action_id: str, name: str, pspec: ParamSpec, value: object) -> object:
