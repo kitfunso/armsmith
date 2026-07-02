@@ -349,6 +349,23 @@ def test_enumerate_kleidiai_filtered_without_i8mm():
     assert all(va.action_id != "kleidiai" for va, _ in cands)
 
 
+def test_enumerate_filters_quants_to_available_variants():
+    """The model registry is the source of truth for which GGUF variants exist:
+    a quant candidate the ModelSpec does not pin must never be enumerated
+    (observed live: ModelSpec.resolve raised KeyError('Q8_0') mid-optimize when
+    the registry pinned only Q4_0)."""
+    target, model, workload = _target(), _model(), _workload()
+    base = baseline_config(workload, model)
+
+    cands = enumerate_candidates(REGISTRY, target, base, available_quants=[base.quant])
+
+    # Q8_0/Q4_K_M are filtered out; the pinned quant equals the baseline's, so
+    # its candidate is a no-op and is dropped too -> no quant_format candidates.
+    assert all(va.action_id != "quant_format" for va, _ in cands)
+    # Other levers are untouched by the filter.
+    assert any(va.action_id == "ggml_native" for va, _ in cands)
+
+
 def test_enumerate_composes_onto_incumbent_so_levers_stack():
     target, model, workload = _target(), _model(), _workload()
     base = baseline_config(workload, model)

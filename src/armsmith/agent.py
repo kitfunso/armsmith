@@ -79,6 +79,8 @@ def enumerate_candidates(
     registry: Sequence[ActionSpec],
     target: TargetSpec,
     base: BenchConfig,
+    *,
+    available_quants: Sequence[str] | None = None,
 ) -> list[tuple[ValidatedAction, BenchConfig]]:
     """The tuner's deterministic, BOUNDED grid off ``base``.
 
@@ -104,6 +106,15 @@ def enumerate_candidates(
         for raw_params in _param_combos(action, target):
             validated = validate_suggestion(action.id, raw_params)
             validated = _resolve_target_params(validated, target)
+            # The model registry is the source of truth for which GGUF variants
+            # exist: a quant the ModelSpec does not pin cannot be staged or
+            # benched (ModelSpec.resolve raises KeyError deep in bench_command).
+            if (
+                available_quants is not None
+                and "quant" in validated.params
+                and validated.params["quant"] not in available_quants
+            ):
+                continue
             cand_cfg = apply_to_config(validated, base)
             if cand_cfg.config_id == base.config_id:
                 continue  # no-op relative to the incumbent
@@ -306,7 +317,10 @@ def optimize(
         return [
             (validated, cand)
             for (validated, cand) in enumerate_candidates(
-                registry, manifest.target, cfg
+                registry,
+                manifest.target,
+                cfg,
+                available_quants=sorted(manifest.model.variants),
             )
             if validated.action_id not in applied
         ]
