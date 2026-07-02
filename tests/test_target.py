@@ -811,13 +811,14 @@ def test_capture_base_logits_writes_kld_in_write_mode(
             f"{REMOTE_ROOT}/base.kld",
         ]
     )
-    fake = FakeSSHClient({expected_cmd: (0, "", "")})
+    stat_cmd = shlex.join(["stat", "-c", "%s", f"{REMOTE_ROOT}/base.kld"])
+    fake = FakeSSHClient({expected_cmd: (0, "", ""), stat_cmd: (0, "412345678\n", "")})
     target = make_target(model_spec, fake)
 
     kld = target.capture_base_logits(cfg, eval_remote)
 
     assert kld == f"{REMOTE_ROOT}/base.kld"
-    assert fake.calls == [expected_cmd]
+    assert fake.calls == [expected_cmd, stat_cmd]
     # WRITE mode (produce base logits) must NOT pass the read/compare flag.
     assert "--kl-divergence" not in fake.calls[0].split()
 
@@ -829,6 +830,24 @@ def test_capture_base_logits_raises_bench_error_on_nonzero_exit(
     target = make_target(model_spec, fake)
 
     with pytest.raises(BenchError):
+        target.capture_base_logits(cfg, f"{REMOTE_ROOT}/eval.txt")
+
+
+def test_capture_base_logits_rejects_stub_file(
+    model_spec: ModelSpec, cfg: BenchConfig
+) -> None:
+    """llama-perplexity exits 0 even when it evaluates nothing: an eval text
+    under 1024 tokens produced a 12-byte base.kld stub on a real r8g
+    (2026-07-02), and every later KL read failed. The capture must fail loudly
+    instead."""
+    stat_cmd = shlex.join(["stat", "-c", "%s", f"{REMOTE_ROOT}/base.kld"])
+    fake = FakeSSHClient(
+        {stat_cmd: (0, "12\n", "")},
+        default=(0, "", "perplexity: you need at least 1024 tokens"),
+    )
+    target = make_target(model_spec, fake)
+
+    with pytest.raises(BenchError, match="invalid stub"):
         target.capture_base_logits(cfg, f"{REMOTE_ROOT}/eval.txt")
 
 

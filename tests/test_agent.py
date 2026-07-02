@@ -765,6 +765,36 @@ def test_optimize_writes_trajectory_recipe_and_audit_artifacts(tmp_path):
     assert list((tmp_path / "snapshots").glob("*.json"))
 
 
+def test_optimize_rotates_stale_trajectory_from_prior_invocation(tmp_path):
+    """A crashed or repeated optimize run must not leave its steps interleaved
+    with this run's trajectory (observed live: a KeyError-aborted run left
+    steps 0-2 duplicated). Prior data is rotated aside, never deleted."""
+    target, model, workload, base_cfg, baseline, manifest = _baseline_pieces()
+    stale = tmp_path / "trajectory.jsonl"
+    stale.write_text('{"stale": "partial step from crashed run"}\n', encoding="utf-8")
+
+    bench = ScriptedBenchmarker(_stacking_decode, _quality_good)
+    optimize(
+        FakeTarget(),
+        NullProfiler(),
+        PassthroughBrain(),
+        bench,
+        manifest=manifest,
+        baseline=baseline,
+        baseline_cfg=base_cfg,
+        expert=None,
+        trajectory_dir=tmp_path,
+        budget=20,
+    )
+
+    rotated = tmp_path / "trajectory.jsonl.1"
+    assert rotated.exists()
+    assert "stale" in rotated.read_text(encoding="utf-8")
+    steps = read_jsonl(tmp_path / "trajectory.jsonl")
+    assert steps  # fresh file holds only this invocation's parseable steps
+    assert [s.step_idx for s in steps] == list(range(len(steps)))
+
+
 def test_budget_caps_iterations(tmp_path):
     target, model, workload, base_cfg, baseline, manifest = _baseline_pieces()
     bench = ScriptedBenchmarker(lambda cfg: DECODE_BASELINE, _quality_good)

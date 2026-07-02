@@ -377,7 +377,19 @@ class Target:
             "--kl-divergence-base",
             kld_path,
         ]
-        self._run(argv, timeout=DEFAULT_TIMEOUT_S, error_cls=BenchError)
+        result = self._run(argv, timeout=DEFAULT_TIMEOUT_S, error_cls=BenchError)
+        # llama-perplexity exits 0 even when it evaluates nothing (observed on a
+        # real r8g: an eval text under 1024 tokens produced a 12-byte header
+        # stub, and every later KL read failed with "failed reading n_vocab").
+        # Real base logits are n_vocab floats per token - megabytes at minimum.
+        size_out = self._run(["stat", "-c", "%s", kld_path]).stdout.strip()
+        if not size_out.isdigit() or int(size_out) < 1024:
+            raise BenchError(
+                f"base logits capture produced an invalid stub at {kld_path} "
+                f"({size_out or 'unknown'} bytes). The eval text must tokenize "
+                "to at least 1024 tokens (2x the 512 context). stderr tail:\n"
+                + result.stderr[-800:]
+            )
         return kld_path
 
     def run_quality(self, cfg: BenchConfig, eval_text_remote: str) -> QualityScore:
@@ -404,7 +416,10 @@ class Target:
             "--kl-divergence",
         ]
         result = self._run(argv, timeout=DEFAULT_TIMEOUT_S, error_cls=BenchError)
-        return _parse_quality_output(result.stdout)
+        # llama.cpp tools log results via common_log -> STDERR; parse both
+        # streams (parsing stdout alone yielded QualityScore(None, None) on a
+        # real r8g run, 2026-07-02).
+        return _parse_quality_output(result.stdout + "\n" + result.stderr)
 
 
 def _remote_home(user: str) -> str:

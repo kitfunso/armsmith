@@ -306,6 +306,17 @@ def optimize(
     (trajectory_dir / "configs").mkdir(parents=True, exist_ok=True)
     (trajectory_dir / "snapshots").mkdir(parents=True, exist_ok=True)
     traj_path = trajectory_dir / "trajectory.jsonl"
+    # One trajectory of record per optimize invocation: a crashed or repeated
+    # run must not leave stale steps interleaved with this run's (observed
+    # live: a KeyError-aborted run left steps 0-2 duplicated in the file).
+    # Prior data is rotated aside, never deleted.
+    if traj_path.exists():
+        rotation = 1
+        while (trajectory_dir / f"trajectory.jsonl.{rotation}").exists():
+            rotation += 1
+        rotated = trajectory_dir / f"trajectory.jsonl.{rotation}"
+        traj_path.rename(rotated)
+        logger.info("rotated previous trajectory to %s", rotated.name)
 
     incumbent_cfg = baseline_cfg
     incumbent_res = baseline
