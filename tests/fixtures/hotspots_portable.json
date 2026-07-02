@@ -1,0 +1,77 @@
+{
+  "status": "success",
+  "recipe": "code_hotspots",
+  "stage": "complete",
+  "session_id": "s1",
+  "columns": [
+    "FUNCTION_NAME",
+    "NODE_TYPE",
+    "PERIODIC_SAMPLES_SELF",
+    "PERIODIC_SAMPLES_SELF_PERCENT"
+  ],
+  "rows": [
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x00081dd0",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 3,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 37.5
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x00009480",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 12.5
+    },
+    {
+      "FUNCTION_NAME": "std::map<llm_tensor, llm_tensor_info, std::less<llm_tensor>, std::allocator<std::pair<llm_tensor const, llm_tensor_info>>>::~map()",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 12.5
+    },
+    {
+      "FUNCTION_NAME": "ggml_cpu_init",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 12.5
+    },
+    {
+      "FUNCTION_NAME": "_Unwind_Find_FDE",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 12.5
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x0000cb80",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 12.5
+    },
+    {
+      "FUNCTION_NAME": "pthread_cond_wait",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x0003f0e0",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "_start",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x0008aaa0",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    }
+  ],
+  "row_count": 10,
+  "warnings": [],
+  "stderr": ""
+}

@@ -1,0 +1,77 @@
+{
+  "status": "success",
+  "recipe": "code_hotspots",
+  "stage": "complete",
+  "session_id": "s1",
+  "columns": [
+    "FUNCTION_NAME",
+    "NODE_TYPE",
+    "PERIODIC_SAMPLES_SELF",
+    "PERIODIC_SAMPLES_SELF_PERCENT"
+  ],
+  "rows": [
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x00081dd0",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 3,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 49.99999999999999
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x00009480",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 16.666666666666664
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x00008a00",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 16.666666666666664
+    },
+    {
+      "FUNCTION_NAME": "ggml_cpu_init",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 1,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 16.666666666666664
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x00016e60",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x0000cb80",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "Unknown symbol @ 0x0001aa40",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "common_log_main()",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "std::thread::join()",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    },
+    {
+      "FUNCTION_NAME": "common_params_parser_init(common_params&, llama_example, void (*)(int, char**))",
+      "NODE_TYPE": "function",
+      "PERIODIC_SAMPLES_SELF": 0,
+      "PERIODIC_SAMPLES_SELF_PERCENT": 0
+    }
+  ],
+  "row_count": 10,
+  "warnings": [],
+  "stderr": ""
+}

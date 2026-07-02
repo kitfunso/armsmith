@@ -1,0 +1,16 @@
+{
+  "status": "error",
+  "recipe": "cpu_microarchitecture",
+  "stage": "failed",
+  "session_id": "s2",
+  "columns": [],
+  "rows": [],
+  "row_count": 0,
+  "warnings": [],
+  "stderr": "Insufficient counters: Minimum of 3 counters required, found 2 for cpu 0",
+  "details": "cpu_microarchitecture recipe requires hardware PMU support not present on this virtualized target",
+  "error": {
+    "Code": "INSUFFICIENT_COUNTERS",
+    "Message": "Minimum of 3 counters required, found 2 for cpu 0"
+  }
+}
