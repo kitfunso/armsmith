@@ -1,0 +1,10 @@
+{
+  "name": "qwen2.5-7b-instruct",
+  "baseline_quant": "Q4_0",
+  "variants": {
+    "Q4_0": [
+      "~/qwen2.5-7b-q4_0.gguf",
+      "b878c7e0729b96b9cb0c9f1a8e944a8b20d5d09df811540537f09c85a065b5c2"
+    ]
+  }
+}

@@ -157,15 +157,16 @@ class Target:
         kernel = self._run(["uname", "-r"]).stdout.strip()
         lscpu_out = self._run(["lscpu"]).stdout
         n_physical_cores, capabilities = _parse_lscpu(lscpu_out)
-        governor = self._run(
-            ["cat", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"]
-        ).stdout.strip()
-        instance_type = self._run(
-            ["curl", "-s", "http://169.254.169.254/latest/meta-data/instance-type"]
-        ).stdout.strip()
-        region = self._run(
-            ["curl", "-s", "http://169.254.169.254/latest/meta-data/placement/region"]
-        ).stdout.strip()
+        # Virtualized Graviton guests expose no cpufreq driver; the governor is
+        # environment metadata, so its absence is recorded, never fatal.
+        try:
+            governor = self._run(
+                ["cat", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"]
+            ).stdout.strip()
+        except TargetError:
+            governor = "unavailable"
+        instance_type = self._imds("instance-type")
+        region = self._imds("placement/region")
         return TargetSpec(
             host=self.host,
             user=self.user,
@@ -177,6 +178,40 @@ class Target:
             n_physical_cores=n_physical_cores,
             capabilities=capabilities,
         )
+
+    def _imds(self, path: str) -> str:
+        """EC2 instance metadata via IMDSv2 (token required on current instances;
+        tokenless requests return empty). Environment metadata only - degrades to
+        "unknown" rather than failing the run."""
+        try:
+            token = self._run(
+                [
+                    "curl",
+                    "-sX",
+                    "PUT",
+                    "-m",
+                    "2",
+                    "http://169.254.169.254/latest/api/token",
+                    "-H",
+                    "X-aws-ec2-metadata-token-ttl-seconds: 60",
+                ]
+            ).stdout.strip()
+            if not token:
+                return "unknown"
+            value = self._run(
+                [
+                    "curl",
+                    "-s",
+                    "-m",
+                    "2",
+                    "-H",
+                    f"X-aws-ec2-metadata-token: {token}",
+                    f"http://169.254.169.254/latest/meta-data/{path}",
+                ]
+            ).stdout.strip()
+            return value or "unknown"
+        except TargetError:
+            return "unknown"
 
     # -- model staging --------------------------------------------------------
 
@@ -244,6 +279,9 @@ class Target:
 
     def _assert_kleidiai_active(self, cfg: BenchConfig, build_dir: str) -> None:
         model_path = self._model_path(cfg.quant)
+        # -v is required: llama-bench suppresses model-load logs (including the
+        # `load_tensors: CPU_KLEIDIAI` marker) at default verbosity - verified
+        # on a real r8g 2026-07-02.
         probe_argv = [
             f"{build_dir}/bin/llama-bench",
             "-m",
@@ -254,6 +292,7 @@ class Target:
             "1",
             "-r",
             "1",
+            "-v",
         ]
         result = self._run(probe_argv, timeout=DEFAULT_TIMEOUT_S, error_cls=BuildError)
         if "CPU_KLEIDIAI" not in (result.stdout + result.stderr):
@@ -280,9 +319,13 @@ class Target:
             str(cfg.n_batch),
             "-ub",
             str(cfg.n_ubatch),
-            "-t",
-            str(cfg.n_threads),
         ]
+        # n_threads == 0 means "engine default": OMIT -t entirely (the honest
+        # naive baseline is a user who never passes -t). Passing a literal
+        # `-t 0` aborts ggml with GGML_ASSERT(cplan->n_threads > 0) - observed
+        # on a real r8g, 2026-07-02.
+        if cfg.n_threads > 0:
+            argv += ["-t", str(cfg.n_threads)]
         if cfg.cpu_mask is not None:
             argv += ["--cpu-mask", cfg.cpu_mask]
         argv += self._kv_cache_args(cfg)

@@ -236,6 +236,33 @@ def test_bench_command_renders_exact_argv(
     )
 
 
+def test_bench_command_omits_thread_flag_for_engine_default(
+    model_spec: ModelSpec,
+) -> None:
+    """n_threads == 0 means engine default: `-t` must be OMITTED. A literal
+    `-t 0` aborts ggml with GGML_ASSERT(cplan->n_threads > 0) - observed on a
+    real r8g, 2026-07-02."""
+    cfg_default_threads = BenchConfig.create(
+        cmake_flags=("-DGGML_NATIVE=OFF",),
+        quant="Q4_0",
+        n_threads=0,
+        cpu_mask=None,
+        type_k="f16",
+        type_v="f16",
+        flash_attn=None,
+        env=(),
+        n_prompt=256,
+        n_gen=64,
+        n_batch=2048,
+        n_ubatch=512,
+    )
+    target = make_target(model_spec, FakeSSHClient())
+
+    argv = target.bench_command(cfg_default_threads)
+
+    assert "-t" not in argv
+
+
 def test_bench_command_includes_cpu_mask_and_flash_attn_when_set(
     model_spec: ModelSpec,
 ) -> None:
@@ -416,6 +443,8 @@ def test_build_asserts_kleidiai_marker_when_requested(model_spec: ModelSpec) -> 
         ["cmake", "-S", REPO_DIR, "-B", build_dir, "-DGGML_CPU_KLEIDIAI=ON"]
     )
     build_cmd = shlex.join(["cmake", "--build", build_dir, "-j"])
+    # -v is load-bearing: llama-bench hides the load_tensors marker without it
+    # (observed on a real r8g, 2026-07-02).
     probe_cmd = shlex.join(
         [
             f"{build_dir}/bin/llama-bench",
@@ -427,6 +456,7 @@ def test_build_asserts_kleidiai_marker_when_requested(model_spec: ModelSpec) -> 
             "1",
             "-r",
             "1",
+            "-v",
         ]
     )
     fake = FakeSSHClient(
@@ -559,6 +589,34 @@ Flags:                    fp asimd sve2 bf16 i8mm
 """
 
 
+_IMDS_TOKEN_CMD = shlex.join(
+    [
+        "curl",
+        "-sX",
+        "PUT",
+        "-m",
+        "2",
+        "http://169.254.169.254/latest/api/token",
+        "-H",
+        "X-aws-ec2-metadata-token-ttl-seconds: 60",
+    ]
+)
+
+
+def _imds_get_cmd(path: str, token: str) -> str:
+    return shlex.join(
+        [
+            "curl",
+            "-s",
+            "-m",
+            "2",
+            "-H",
+            f"X-aws-ec2-metadata-token: {token}",
+            f"http://169.254.169.254/latest/meta-data/{path}",
+        ]
+    )
+
+
 def test_describe_parses_target_spec(model_spec: ModelSpec) -> None:
     fake = FakeSSHClient(
         {
@@ -569,16 +627,9 @@ def test_describe_parses_target_spec(model_spec: ModelSpec) -> None:
                 "performance\n",
                 "",
             ),
-            "curl -s http://169.254.169.254/latest/meta-data/instance-type": (
-                0,
-                "r8g.4xlarge",
-                "",
-            ),
-            "curl -s http://169.254.169.254/latest/meta-data/placement/region": (
-                0,
-                "eu-west-2",
-                "",
-            ),
+            _IMDS_TOKEN_CMD: (0, "TOK123", ""),
+            _imds_get_cmd("instance-type", "TOK123"): (0, "r8g.4xlarge", ""),
+            _imds_get_cmd("placement/region", "TOK123"): (0, "eu-west-2", ""),
         }
     )
     target = make_target(model_spec, fake)
@@ -591,6 +642,34 @@ def test_describe_parses_target_spec(model_spec: ModelSpec) -> None:
     assert spec.cpu_governor == "performance"
     assert spec.instance_type == "r8g.4xlarge"
     assert spec.region == "eu-west-2"
+
+
+def test_describe_degrades_without_cpufreq_or_imds_token(
+    model_spec: ModelSpec,
+) -> None:
+    """Virtualized Graviton: no cpufreq sysfs node; IMDSv2 returns empty without
+    a token. Both are environment metadata - recorded as unavailable/unknown,
+    never fatal (observed on a real r8g, 2026-07-02)."""
+    fake = FakeSSHClient(
+        {
+            "uname -r": (0, "6.8.0-1015-aws\n", ""),
+            "lscpu": (0, _LSCPU_OUTPUT, ""),
+            "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor": (
+                1,
+                "",
+                "cat: /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor: "
+                "No such file or directory",
+            ),
+            _IMDS_TOKEN_CMD: (0, "", ""),
+        }
+    )
+    target = make_target(model_spec, fake)
+
+    spec = target.describe()
+
+    assert spec.cpu_governor == "unavailable"
+    assert spec.instance_type == "unknown"
+    assert spec.region == "unknown"
 
 
 def test_parse_lscpu_helper_is_pure() -> None:
