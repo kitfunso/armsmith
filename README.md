@@ -17,9 +17,10 @@ armsmith is an AI that optimizes AI for Arm. Point it at a Graviton instance and
 model; a **deterministic autotuner** sweeps a 5-lever action space (build flags, KleidiAI
 microkernels, quant format, threading/affinity, KV-cache type) while a **Claude analyst**
 reads Arm Performix counter evidence, prioritizes the search, and narrates every
-keep/revert. On Graviton4 (r8g, Qwen2.5-7B Q4_0) it took decode from **21.85 to
-45.46 tok/s (2.1x)** and prefill TTFT from 8.7s to 1.6s — **beating the expert config
-pre-registered before the run** (41.35 tok/s, 121% of the naive→expert gap closed),
+keep/revert. On Graviton4 (r8g, Qwen2.5-7B Q4_0, pp512/tg128, N=7) it took decode from
+**21.58 to 44.73 tok/s (2.1x)** and prefill TTFT from 17.6s to 3.8s — **beating the
+expert config pre-registered before the run** (40.14 tok/s, 125% of the naive→expert
+gap closed),
 with a quality guard (KL vs baseline 0.002) proving the model was not degraded.
 The LLM never emits shell and never decides: it proposes, a registry-validated gate
 disposes, and removing it entirely still finds the same winner.

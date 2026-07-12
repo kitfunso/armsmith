@@ -410,9 +410,20 @@ def repro(
         workload_spec = load_workload(manifest.workload_ref)
 
         with Target(target, user, ssh_key, recipe.model) as tgt:
+            # Stage what the confirm stage consumes (same contract as
+            # baseline/optimize): the GGUF variants, the eval text, and base
+            # logits recaptured from the recipe's own baseline config. A FRESH
+            # instance has none of them - the first real fresh-box replay
+            # (2026-07-12) died inside run_quality on the un-staged eval path.
+            tgt.fetch_model(
+                sorted({recipe.baseline_config.quant, recipe.winning_config.quant})
+            )
+            eval_remote = tgt.upload_eval_text(workload_spec.eval_text_path)
+            tgt.build(recipe.baseline_config)
+            tgt.capture_base_logits(recipe.baseline_config, eval_remote)
             benchmarker = Benchmarker(
                 tgt.run_bench,
-                lambda cfg: tgt.run_quality(cfg, workload_spec.eval_text_path),
+                lambda cfg: tgt.run_quality(cfg, eval_remote),
                 workload_spec,
             )
             result = agent.replay(tgt, benchmarker, recipe, tol_pct=tol_pct)
