@@ -383,7 +383,17 @@ def test_build_renders_configure_and_build_commands(
             "-DGGML_CPU_KLEIDIAI=OFF",
         ]
     )
-    build_cmd = shlex.join(["cmake", "--build", build_dir, "-j"])
+    build_cmd = shlex.join(
+        [
+            "cmake",
+            "--build",
+            build_dir,
+            "-j",
+            "--target",
+            "llama-bench",
+            "llama-perplexity",
+        ]
+    )
     fake = FakeSSHClient(
         {configure_cmd: (0, "configured", ""), build_cmd: (0, "built", "")}
     )
@@ -442,7 +452,17 @@ def test_build_asserts_kleidiai_marker_when_requested(model_spec: ModelSpec) -> 
     configure_cmd = shlex.join(
         ["cmake", "-S", REPO_DIR, "-B", build_dir, "-DGGML_CPU_KLEIDIAI=ON"]
     )
-    build_cmd = shlex.join(["cmake", "--build", build_dir, "-j"])
+    build_cmd = shlex.join(
+        [
+            "cmake",
+            "--build",
+            build_dir,
+            "-j",
+            "--target",
+            "llama-bench",
+            "llama-perplexity",
+        ]
+    )
     # -v is load-bearing: llama-bench hides the load_tensors marker without it
     # (observed on a real r8g, 2026-07-02).
     probe_cmd = shlex.join(

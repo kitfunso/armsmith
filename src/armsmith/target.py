@@ -271,7 +271,20 @@ class Target:
             *cfg.cmake_flags,
         ]
         self._run(configure_argv, timeout=DEFAULT_TIMEOUT_S, error_cls=BuildError)
-        build_argv = ["cmake", "--build", build_dir, "-j"]
+        # Build ONLY the binaries armsmith invokes (run_bench / run_quality).
+        # The default `all` target drags in llama.cpp's webui asset embed,
+        # which needs npm or a HuggingFace download of a version-matched
+        # dist.tar.gz - that URL rotted between 2026-07-02 and 2026-07-12 and
+        # broke otherwise-identical builds. armsmith never runs the webui.
+        build_argv = [
+            "cmake",
+            "--build",
+            build_dir,
+            "-j",
+            "--target",
+            "llama-bench",
+            "llama-perplexity",
+        ]
         self._run(build_argv, timeout=DEFAULT_TIMEOUT_S, error_cls=BuildError)
         if any("GGML_CPU_KLEIDIAI=ON" in flag for flag in cfg.cmake_flags):
             self._assert_kleidiai_active(cfg, build_dir)
