@@ -1,0 +1,1 @@
+{"cmake_flags": ["-DGGML_NATIVE=ON"], "config_id": "88e52d7d1e94", "cpu_mask": null, "env": [], "flash_attn": null, "n_batch": 2048, "n_gen": 128, "n_prompt": 512, "n_threads": 4, "n_ubatch": 512, "quant": "Q4_0", "type_k": "f16", "type_v": "f16"}

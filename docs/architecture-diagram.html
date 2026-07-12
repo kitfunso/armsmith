@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1536px; height:1024px; background:#0b0d10; font-family:"Segoe UI",Arial,sans-serif;
+    display:flex; flex-direction:column; align-items:center; padding:44px 60px; }
+  h1 { color:#f4f4f2; font-size:44px; font-weight:800; letter-spacing:-1px; }
+  h1 .a { color:#3fb6e0; }
+  .sub { color:#8b949e; font-size:20px; margin-top:6px; }
+  .row { display:flex; align-items:stretch; gap:0; margin-top:40px; width:100%; }
+  .box { background:#12161a; border:1.5px solid #2c333a; border-radius:16px; padding:26px 30px; }
+  .box h2 { color:#f4f4f2; font-size:24px; margin-bottom:16px; }
+  .box h2 span { color:#68737d; font-size:16px; font-weight:400; margin-left:8px; }
+  .plane { flex:1.15; }
+  .target { flex:1; }
+  .item { border-radius:10px; padding:13px 16px; margin-bottom:12px; font-size:17.5px; line-height:1.45; }
+  .item b { display:block; font-size:18px; }
+  .tuner { background:rgba(63,182,224,.10); border:1.5px solid #3fb6e0; color:#bfe4f2; }
+  .brain { background:rgba(193,95,60,.12); border:1.5px solid #c15f3c; color:#e8c4b4; }
+  .gate  { background:rgba(46,182,125,.10); border:1.5px solid #2eb67d; color:#bfe8d6; }
+  .plain { background:#181d22; border:1.5px solid #2c333a; color:#9aa7b1; }
+  .arrows { display:flex; flex-direction:column; justify-content:center; gap:26px; padding:0 22px; }
+  .arrow { text-align:center; color:#8b949e; font-size:15px; }
+  .arrow .line { font-size:30px; color:#3fb6e0; letter-spacing:-2px; }
+  .arrow .line.back { color:#c15f3c; }
+  .outputs { margin-top:34px; width:100%; display:flex; gap:20px; }
+  .out { flex:1; background:#12161a; border:1.5px solid #2c333a; border-radius:12px;
+    padding:18px 22px; }
+  .out b { color:#e8912d; font-family:Consolas,monospace; font-size:19px; display:block; }
+  .out span { color:#8b949e; font-size:15.5px; line-height:1.4; display:block; margin-top:6px; }
+  .foot { margin-top:30px; color:#68737d; font-size:17px; }
+  .foot b { color:#9aa7b1; }
+</style>
+</head>
+<body>
+  <h1><span class="a">⚒</span> armsmith architecture</h1>
+  <div class="sub">The tuner decides · the LLM explains · every number measured on real Arm silicon</div>
+
+  <div class="row">
+    <div class="box plane">
+      <h2>Control plane <span>x86 PC — orchestrates only, never measures</span></h2>
+      <div class="item tuner"><b>Deterministic tuner</b>
+        sweeps the 5-lever registry: build flags · KleidiAI · quant format · threads/affinity · KV-cache</div>
+      <div class="item brain"><b>Claude analyst (advisory)</b>
+        reads Performix evidence, reorders the search, narrates every keep/revert — never emits shell</div>
+      <div class="item gate"><b>Registry gate + quality guard</b>
+        off-registry suggestions dropped; KL/perplexity regressions rejected, never reported as wins</div>
+      <div class="item plain"><b>Benchmarker</b>
+        warmup discarded · N≥5 repeats · median + 95% CI · decode and prefill separate</div>
+    </div>
+    <div class="arrows">
+      <div class="arrow"><div class="line">──── SSH ────▶</div>templated commands<br>(registry ActionSpec only)</div>
+      <div class="arrow"><div class="line back">◀── evidence ──</div>bench stats · counters<br>via arm-mcp (docker stdio)</div>
+    </div>
+    <div class="box target">
+      <h2>Target <span>AWS Graviton4 · r8g · Neoverse V2</span></h2>
+      <div class="item plain"><b>llama.cpp builds</b> one build dir per config hash — free revert, pinned commit</div>
+      <div class="item plain"><b>llama-bench</b> decode tok/s + prefill TTFT, fixed workload, fixed seed</div>
+      <div class="item plain"><b>llama-perplexity</b> KL vs baseline + perplexity — the quality guard's input</div>
+      <div class="item plain"><b>Arm Performix</b> <i>apx_recipe_run</i> hotspots/counters (virtualized: narration input)</div>
+    </div>
+  </div>
+
+  <div class="outputs">
+    <div class="out"><b>recipe.json</b><span>winning config + CIs — replays via <i>armsmith repro</i>, no LLM in the loop</span></div>
+    <div class="out"><b>trajectory.jsonl</b><span>every candidate: evidence, delta, rationale, kept/reverted</span></div>
+    <div class="out"><b>report.html</b><span>self-contained visual trajectory — the run explains itself</span></div>
+  </div>
+
+  <div class="foot">Result on r8g (Qwen2.5-7B Q4_0): <b>21.85 → 45.46 tok/s decode (2.1×)</b> · beat the pre-registered expert config · KL vs baseline 0.002 · Apache-2.0</div>
+</body>
+</html>
