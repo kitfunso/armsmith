@@ -17,9 +17,17 @@ env/
 *.key
 
 # armsmith run outputs / large artifacts
+# (the submission run is force-added: repro needs its recipe.json in-repo)
 trajectories/
 *.gguf
 report.html
+
+# demo video build outputs (sources are committed; renders are not)
+video/remotion/node_modules/
+video/remotion/src/artifacts.json
+video/remotion/qa/
+video/*.mp4
+video/*.webm
 
 # OS / editor
 .DS_Store

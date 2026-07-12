@@ -1,0 +1,100 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* ---------- captions + chip overlays ---------- */
+.cap { position:absolute; left:50%; bottom:54px; transform:translateX(-50%); z-index:900;
+  background:rgba(8,10,12,.92); border:1px solid #3a3f45; color:#eceff1;
+  font-size:26px; font-weight:600; padding:16px 34px; border-radius:12px;
+  max-width:1500px; text-align:center; }
+.chip { position:absolute; top:28px; right:36px; z-index:900; background:rgba(8,10,12,.85);
+  border:1px solid #3a3f45; color:#9fb2c8; font-size:17px; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase; padding:9px 18px; border-radius:999px; }
+
+/* ---------- dark cards ---------- */
+.darkcard { width:100%; height:100%; background:#0b0d10; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:30px; }
+.wordmark { font-size:110px; font-weight:800; color:#f4f4f2; letter-spacing:-2px; }
+.wordmark .anvil { color:#0091bd; }
+.tagline { font-size:34px; color:#8b949e; max-width:1400px; text-align:center; line-height:1.4; }
+.urlline { font-size:28px; color:#3fb6e0; font-family:Consolas,monospace; }
+.bigline { color:#f4f4f2; font-size:62px; font-weight:800; max-width:1520px;
+  text-align:center; line-height:1.3; }
+.bigline em { color:#3fb6e0; font-style:normal; }
+.bigline .amber { color:#e8912d; }
+.subline { color:#8b949e; font-size:26px; letter-spacing:3px; text-transform:uppercase; }
+.numstrip { display:flex; gap:60px; margin-top:8px; }
+.numstrip .n { text-align:center; }
+.numstrip .n b { display:block; color:#e8912d; font-size:52px; font-weight:800; }
+.numstrip .n span { color:#8b949e; font-size:20px; letter-spacing:1px; text-transform:uppercase; }
+
+/* ---------- terminal ---------- */
+.termwrap { position:absolute; inset:0; background:#0b0d10; display:flex;
+  align-items:center; justify-content:center; }
+.term { width:1460px; background:#0c0f12; border:1px solid #2c333a; border-radius:12px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6); overflow:hidden; }
+.term .bar { background:#161b20; padding:12px 18px; display:flex; gap:8px; align-items:center; }
+.term .bar i { width:13px; height:13px; border-radius:50%; display:inline-block; }
+.term .bar .r{background:#ff5f57}.term .bar .y{background:#febc2e}.term .bar .g{background:#28c840}
+.term .bar span { color:#8b949e; font-size:15px; margin-left:12px; font-family:Consolas,monospace; }
+.term pre { padding:26px 32px 34px; font-family:Consolas,monospace; font-size:21px; line-height:1.75;
+  color:#d7e0e8; min-height:420px; white-space:pre-wrap; }
+.term pre .p { color:#3fb6e0; }
+.term pre .ok { color:#2eb67d; font-weight:700; }
+.term pre .num { color:#e8912d; }
+.term pre .dim { color:#68737d; }
+
+/* ---------- analyst card (the brain's verdict) ---------- */
+.analystwrap { position:absolute; inset:0; background:#0b0d10; display:flex;
+  align-items:center; justify-content:center; }
+.analyst { width:1320px; background:#f0eee6; border-radius:16px; overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55); }
+.analyst .bar { background:#e8e5da; padding:14px 24px; font-weight:700; color:#3d3929;
+  font-size:18px; display:flex; align-items:center; gap:10px; }
+.analyst .bar .tag { margin-left:auto; background:#c15f3c; color:#fff; font-size:13px;
+  font-weight:800; letter-spacing:1px; padding:4px 12px; border-radius:999px; }
+.analyst .body { padding:30px 38px 36px; color:#1d1c1d; }
+.analyst .rationale { font-size:24px; line-height:1.55; max-width:1220px; }
+.analyst .prio { margin-top:26px; display:flex; gap:14px; flex-wrap:wrap; }
+.analyst .prio .pi { background:#fff; border:1px solid #d5d1c3; border-radius:10px;
+  padding:10px 18px; font-family:Consolas,monospace; font-size:19px; color:#5f5b4c; }
+.analyst .prio .pi b { color:#c15f3c; }
+.analyst .advisory { margin-top:22px; color:#8a8574; font-size:17px; letter-spacing:1px;
+  text-transform:uppercase; }
+
+/* ---------- result card (a measured candidate) ---------- */
+.resultwrap { position:absolute; inset:0; background:#0b0d10; display:flex;
+  align-items:center; justify-content:center; }
+.result { width:1200px; background:#12161a; border:1px solid #2c333a; border-radius:16px;
+  padding:40px 48px; }
+.result .act { font-family:Consolas,monospace; font-size:30px; color:#3fb6e0; }
+.result .delta { font-size:110px; font-weight:800; margin:18px 0 6px; }
+.result .delta.up { color:#2eb67d; } .result .delta.down { color:#e01e5a; }
+.result .detail { color:#9aa7b1; font-size:24px; line-height:1.6; }
+.result .detail b { color:#e8912d; }
+.result .badge { display:inline-block; margin-top:26px; font-size:26px; font-weight:800;
+  letter-spacing:2px; padding:12px 30px; border-radius:10px; }
+.result .badge.kept { background:rgba(46,182,125,.15); color:#2eb67d; border:2px solid #2eb67d; }
+.result .badge.reverted { background:rgba(224,30,90,.12); color:#e01e5a; border:2px solid #e01e5a; }
+
+/* ---------- sweep strip ---------- */
+.sweepwrap { position:absolute; inset:0; background:#0b0d10; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:40px; }
+.sweeptitle { color:#8b949e; font-size:26px; letter-spacing:3px; text-transform:uppercase; }
+.strip { display:flex; flex-wrap:wrap; gap:16px; max-width:1500px; justify-content:center; }
+.step { border-radius:10px; padding:14px 20px; font-family:Consolas,monospace; font-size:20px;
+  border:1.5px solid; }
+.step.kept { background:rgba(46,182,125,.12); color:#2eb67d; border-color:#2eb67d; }
+.step.rev { background:rgba(224,30,90,.07); color:#b3546f; border-color:#5c3743; }
+.converge { color:#f4f4f2; font-size:40px; font-weight:800; }
+.converge b { color:#e8912d; }
+
+/* ---------- victory bars ---------- */
+.barswrap { position:absolute; inset:0; background:#0b0d10; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:44px; }
+.bars { display:flex; align-items:flex-end; gap:110px; height:520px; }
+.barcol { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+.bar1 { width:190px; border-radius:10px 10px 0 0; position:relative; }
+.bar1 .val { position:absolute; top:-56px; left:50%; transform:translateX(-50%);
+  font-size:38px; font-weight:800; color:#f4f4f2; white-space:nowrap; }
+.barlabel { margin-top:16px; color:#9aa7b1; font-size:23px; text-align:center; line-height:1.4; }
+.gapline { color:#f4f4f2; font-size:40px; font-weight:800; }
+.gapline b { color:#2eb67d; }

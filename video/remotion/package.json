@@ -1,0 +1,22 @@
+{
+  "name": "armsmith-demo-video",
+  "version": "0.1.0",
+  "description": "Remotion source for the armsmith demo video",
+  "private": true,
+  "scripts": {
+    "sync": "node scripts/sync-artifacts.mjs",
+    "preview": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts armsmith-demo",
+    "render": "node scripts/sync-artifacts.mjs && remotion render src/index.ts armsmith-demo ../armsmith-demo.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.484",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "4.0.484"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.6.0"
+  }
+}
